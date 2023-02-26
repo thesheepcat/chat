@@ -63,8 +63,87 @@ func main() {
 		}
 	*/
 
+	// Defines the default gossipsub parameters.
+	var (
+		GossipSubD                                = 6
+		GossipSubDlo                              = 5
+		GossipSubDhi                              = 12
+		GossipSubDscore                           = 4
+		GossipSubDout                             = 2
+		GossipSubHistoryLength                    = 5
+		GossipSubHistoryGossip                    = 3
+		GossipSubDlazy                            = 6
+		GossipSubGossipFactor                     = 0.25
+		GossipSubGossipRetransmission             = 3
+		GossipSubHeartbeatInitialDelay            = 100 * time.Millisecond
+		GossipSubHeartbeatInterval                = 1 * time.Second
+		GossipSubFanoutTTL                        = 60 * time.Second
+		GossipSubPrunePeers                       = 16
+		GossipSubPruneBackoff                     = time.Minute
+		GossipSubUnsubscribeBackoff               = 10 * time.Second
+		GossipSubConnectors                       = 8
+		GossipSubMaxPendingConnections            = 128
+		GossipSubConnectionTimeout                = 30 * time.Second
+		GossipSubDirectConnectTicks        uint64 = 300
+		GossipSubDirectConnectInitialDelay        = time.Second
+		GossipSubOpportunisticGraftTicks   uint64 = 60
+		GossipSubOpportunisticGraftPeers          = 2
+		GossipSubGraftFloodThreshold              = 10 * time.Second
+		GossipSubMaxIHaveLength                   = 5000
+		GossipSubMaxIHaveMessages                 = 10
+		GossipSubIWantFollowupTime                = 3 * time.Second
+	)
+
+	// Set customized configuration parameters
+	cfg := pubsub.GossipSubParams{
+		D:                         GossipSubD,
+		Dlo:                       GossipSubDlo,
+		Dhi:                       GossipSubDhi,
+		Dscore:                    GossipSubDscore,
+		Dout:                      GossipSubDout,
+		HistoryLength:             GossipSubHistoryLength,
+		HistoryGossip:             GossipSubHistoryGossip,
+		Dlazy:                     GossipSubDlazy,
+		GossipFactor:              GossipSubGossipFactor,
+		GossipRetransmission:      GossipSubGossipRetransmission,
+		HeartbeatInitialDelay:     GossipSubHeartbeatInitialDelay,
+		HeartbeatInterval:         GossipSubHeartbeatInterval,
+		FanoutTTL:                 GossipSubFanoutTTL,
+		PrunePeers:                GossipSubPrunePeers,
+		PruneBackoff:              GossipSubPruneBackoff,
+		UnsubscribeBackoff:        GossipSubUnsubscribeBackoff,
+		Connectors:                GossipSubConnectors,
+		MaxPendingConnections:     GossipSubMaxPendingConnections,
+		ConnectionTimeout:         GossipSubConnectionTimeout,
+		DirectConnectTicks:        GossipSubDirectConnectTicks,
+		DirectConnectInitialDelay: GossipSubDirectConnectInitialDelay,
+		OpportunisticGraftTicks:   GossipSubOpportunisticGraftTicks,
+		OpportunisticGraftPeers:   GossipSubOpportunisticGraftPeers,
+		GraftFloodThreshold:       GossipSubGraftFloodThreshold,
+		MaxIHaveLength:            GossipSubMaxIHaveLength,
+		MaxIHaveMessages:          GossipSubMaxIHaveMessages,
+		IWantFollowupTime:         GossipSubIWantFollowupTime,
+		SlowHeartbeatWarning:      0.1,
+	}
+
+	// set gossipSub options
+	//pubsub.GossipSubHeartbeatInterval = 1000 * time.Millisecond
+	options := []pubsub.Option{
+		// Gossipsubv1.1 configuration
+		//pubsub.WithFloodPublish(true),
+		//  buffer, 32 -> 10K
+		//pubsub.WithValidateQueueSize(10 << 10),
+		//  worker, 1x cpu -> 2x cpu
+		//pubsub.WithValidateWorkers(runtime.NumCPU() * 2),
+		//  goroutine, 8K -> 16K
+		//pubsub.WithValidateThrottle(16 << 10),
+		//pubsub.WithMessageSigning(true),
+		pubsub.WithPeerExchange(true),
+		pubsub.WithGossipSubParams(cfg),
+	}
+
 	// create a new PubSub service using the GossipSub router
-	ps, err := pubsub.NewGossipSub(ctx, ha)
+	ps, err := pubsub.NewGossipSub(ctx, ha, options...)
 	if err != nil {
 		panic(err)
 	}
